@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Scientific Calculator</title>
+    <!-- Load Tailwind CSS via CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .calc-button {
+            @apply p-3 rounded-xl shadow-lg transition-all duration-150 font-semibold;
+        }
+        .action-btn {
+            @apply bg-indigo-500 hover:bg-indigo-600 text-white;
+        }
+        .num-btn {
+            @apply bg-white hover:bg-gray-100 text-gray-800;
+        }
+        .op-btn {
+            @apply bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm;
+        }
+        /* Applies to the new <input> element */
+        .input-field {
+            @apply w-full p-4 text-right text-3xl font-mono rounded-xl shadow-inner mb-4 bg-gray-900 text-green-400 border-2 border-gray-700;
+            grid-column: span 5;
+            overflow-x: auto;
+            white-space: nowrap;
+            /* Ensure the input text looks correct */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            line-height: normal; /* Fixes vertical alignment in some browsers */
+        }
+        .limitation-box {
+            @apply fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300;
+        }
+        .limitation-content {
+            @apply bg-white p-8 rounded-xl shadow-2xl max-w-sm text-center transform scale-100 transition-transform duration-300;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-white p-6 md:p-10 rounded-3xl shadow-2xl max-w-4xl w-full">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+            Advanced Scientific Calculator
+        </h1>
+
+        <!-- Input Display: Changed to a read-only input box -->
+        <div id="display-container" class="mb-6">
+            <input type="text" id="display" class="input-field" value="0" readonly>
+        </div>
+
+        <!-- Calculator Grid -->
+        <div class="calculator-grid">
+            <!-- Row 1: Advanced Functions -->
+            <button class="calc-button op-btn" data-op="pow">xⁿ</button>
+            <button class="calc-button op-btn" data-op="exp">eˣ</button>
+            <button class="calc-button op-btn" data-op="ln">ln x</button>
+            <button class="calc-button op-btn" data-op="reciprocal">1/x</button>
+            <button class="calc-button action-btn bg-red-500 hover:bg-red-600" data-op="clear">AC</button>
+
+            <!-- Row 2: Trigs and Root -->
+            <button class="calc-button op-btn" data-op="sin">sin</button>
+            <button class="calc-button op-btn" data-op="cos">cos</button>
+            <button class="calc-button op-btn" data-op="tan">tan</button>
+            <button class="calc-button op-btn" data-op="sqrt">√x</button>
+            <button class="calc-button action-btn" data-op="divide">/</button>
+
+            <!-- Row 3: Inverse Trigs and Hyperbolic -->
+            <button class="calc-button op-btn" data-op="asin">asin</button>
+            <button class="calc-button op-btn" data-op="acos">acos</button>
+            <button class="calc-button op-btn" data-op="atan">atan</button>
+            <button class="calc-button op-btn" data-op="sinh">sinh</button>
+            <button class="calc-button action-btn" data-op="multiply">*</button>
+
+            <!-- Row 4: Special Functions and Numbers -->
+            <button class="calc-button op-btn" data-op="cosh">cosh</button>
+            <button class="calc-button op-btn" data-op="tanh">tanh</button>
+            <button class="calc-button op-btn" data-op="legendre">Pⁿ(x)</button>
+            <button class="calc-button num-btn" data-value="7">7</button>
+            <button class="calc-button num-btn" data-value="8">8</button>
+            
+            <!-- Row 5: More Special Functions and Numbers -->
+            <button class="calc-button op-btn" data-op="gamma">Γ(x)</button>
+            <button class="calc-button op-btn" data-op="erf">erf(x)</button>
+            <button class="calc-button op-btn" data-op="cexp">eⁱˣ</button>
+            <button class="calc-button num-btn" data-value="9">9</button>
+            <button class="calc-button action-btn" data-op="subtract">-</button>
+
+            <!-- Row 6: Advanced/Limitation Functions and Numbers -->
+            <button class="calc-button op-btn text-xs" data-op="limitation-bessel">Bessel</button>
+            <button class="calc-button op-btn text-xs" data-op="limitation-deriv-int">d/∫</button>
+            <button class="calc-button op-btn text-xs" data-op="limitation-vector">∇/Δ</button>
+            <button class="calc-button num-btn" data-value="4">4</button>
+            <button class="calc-button num-btn" data-value="5">5</button>
+            
+            <!-- Row 7: Advanced/Limitation Functions and Numbers -->
+            <button class="calc-button op-btn text-xs" data-op="limitation-fourier">FT</button>
+            <button class="calc-button op-btn text-xs" data-op="limitation-delta">Dirac Δ</button>
+            <button class="calc-button op-btn text-xs" data-op="pi">π</button>
+            <button class="calc-button num-btn" data-value="6">6</button>
+            <button class="calc-button action-btn" data-op="add">+</button>
+
+            <!-- Row 8: Final Numbers and Equals -->
+            <div class="calc-button op-btn text-xs col-span-2">RAD Mode</div>
+            <button class="calc-button num-btn" data-value="0">0</button>
+            <button class="calc-button num-btn" data-value=".">.</button>
+            <button class="calc-button action-btn bg-green-500 hover:bg-green-600" data-op="equals">=</button>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Limitations and Messages -->
+    <div id="limitation-modal" class="limitation-box hidden" onclick="closeModal()">
+        <div class="limitation-content" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-bold mb-3 text-indigo-600">Function Limitation</h3>
+            <p id="modal-message" class="text-gray-700"></p>
+            <button class="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const modal = document.getElementById('limitation-modal');
+        const modalMessage = document.getElementById('modal-message');
+        const PI = Math.PI;
+
+        let currentInput = '0';
+        let previousInput = null;
+        let operation = null;
+        let waitingForSecondOperand = false;
+
+        // --- Utility Functions ---
+
+        /**
+         * @brief Displays a non-implementable function message.
+         * @param {string} type The type of function (e.g., Derivative).
+         */
+        function showLimitation(type) {
+            let message = '';
+            if (type === 'vector') {
+                message = "Gradient, Divergence, and Curl require a vector field function as input, which is not possible in this calculator.";
+            } else if (type === 'deriv-int') {
+                message = "Derivatives and Integrals require a function as input. This calculator only supports numerical operations.";
+            } else if (type === 'fourier') {
+                message = "Fourier Transforms operate on entire functions or data sets, not single numerical inputs.";
+            } else if (type === 'bessel') {
+                message = "The Bessel function is not implemented due to its complexity and the single-file constraint. Use a specialized math library.";
+            } else if (type === 'delta') {
+                message = "The Dirac Delta 'function' is a distribution. While not numerically calculable in this way, it's used in integrals (often resulting in 0 or 1).";
+            } else if (type.startsWith('Error:')) {
+                message = type; // Pass error messages directly
+            }
+            
+            modalMessage.textContent = message;
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10); // Fade in
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('opacity-100');
+        }
+
+        /**
+         * @brief Updates the calculator display.
+         * @param {string} value The string to display.
+         */
+        function updateDisplay(value) {
+            // Cap display length for visual reasons and use .value for input element
+            display.value = value.length > 20 ? parseFloat(value).toPrecision(15) : value;
+            // The internal currentInput variable must also be kept updated
+            currentInput = value;
+        }
+
+        /**
+         * @brief Handles number button clicks.
+         * @param {string} number The number pressed.
+         */
+        function inputNumber(number) {
+            if (waitingForSecondOperand) {
+                currentInput = number === '.' ? '0.' : number;
+                waitingForSecondOperand = false;
+            } else {
+                if (currentInput === '0' && number !== '.') {
+                    currentInput = number;
+                } else if (number === '.' && currentInput.includes('.')) {
+                    return; // Prevent multiple decimal points
+                } else {
+                    currentInput += number;
+                }
+            }
+            updateDisplay(currentInput);
+        }
+
+        // --- Core Calculation Logic ---
+
+        /**
+         * @brief Performs the binary calculation (e.g., a + b).
+         */
+        function calculate() {
+            if (operation === null || previousInput === null) return;
+
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+
+            if (isNaN(prev) || isNaN(current)) return;
+
+            let result;
+
+            switch (operation) {
+                case 'add':
+                    result = prev + current;
+                    break;
+                case 'subtract':
+                    result = prev - current;
+                    break;
+                case 'multiply':
+                    result = prev * current;
+                    break;
+                case 'divide':
+                    if (current === 0) {
+                        showLimitation('Error: Division by zero.');
+                        clearAll();
+                        return;
+                    }
+                    result = prev / current;
+                    break;
+                case 'pow':
+                    result = Math.pow(prev, current);
+                    break;
+                default:
+                    return;
+            }
+            
+            currentInput = result.toString();
+            operation = null;
+            previousInput = null;
+            waitingForSecondOperand = true;
+            updateDisplay(currentInput);
+        }
+
+        /**
+         * @brief Handles binary operator clicks (e.g., +, -, *).
+         * @param {string} nextOperation The next operation to perform.
+         */
+        function handleOperator(nextOperation) {
+            const inputValue = parseFloat(currentInput);
+
+            if (previousInput === null) {
+                previousInput = currentInput;
+            } else if (operation) {
+                calculate();
+                previousInput = currentInput; // The result becomes the new previousInput
+            }
+
+            waitingForSecondOperand = true;
+            operation = nextOperation;
+            updateDisplay(currentInput);
+        }
+
+        /**
+         * @brief Clears all state.
+         */
+        function clearAll() {
+            currentInput = '0';
+            previousInput = null;
+            operation = null;
+            waitingForSecondOperand = false;
+            display.value = '0'; // Explicitly set the input box value
+        }
+
+        // --- Special & Unary Functions ---
+
+        /**
+         * @brief Calculates the Legendre polynomial P_n(x) using recursion.
+         * @param {number} n The integer order (n >= 0).
+         * @param {number} x The value to evaluate at.
+         * @returns {number} The value of P_n(x).
+         */
+        function legendre(n, x) {
+            if (n === 0) return 1.0;
+            if (n === 1) return x;
+
+            // Bonnet's recursion formula:
+            // P_n(x) = ( (2n-1)*x*P_{n-1}(x) - (n-1)*P_{n-2}(x) ) / n
+            return ((2.0 * n - 1.0) * x * legendre(n - 1, x) - (n - 1.0) * legendre(n - 2, x)) / n;
+        }
+
+        /**
+         * @brief Approximates the Gamma Function Γ(x).
+         * Uses a simplified series approximation for x > 0.
+         * Accuracy is limited compared to professional libraries.
+         * @param {number} z The input value.
+         * @returns {number} The Gamma value.
+         */
+        function tgamma(z) {
+            if (z === 1) return 1;
+            if (z === 0.5) return Math.sqrt(PI);
+            if (z <= 0) {
+                // Return value for singularity or negative argument (not accurate, but handles error case)
+                return NaN; 
+            }
+            if (Number.isInteger(z)) {
+                // For positive integers, it's (z-1)!
+                let res = 1;
+                for (let i = 2; i < z; i++) {
+                    res *= i;
+                }
+                return res;
+            }
+            // Simple Stirling-like approximation for other positive values
+            return Math.sqrt(2 * PI / z) * Math.pow((z / Math.E), z);
+        }
+
+        /**
+         * @brief Approximates the Error Function erf(x).
+         * Uses a simple polynomial approximation.
+         * Accuracy is limited compared to professional libraries.
+         * @param {number} x The input value.
+         * @returns {number} The erf value.
+         */
+        function erf(x) {
+            // Constants for the approximation (Abramowitz and Stegun 7.1.26)
+            const a1 = 0.254829592;
+            const a2 = -0.284496736;
+            const a3 = 1.421413741;
+            const a4 = -1.453152027;
+            const a5 = 1.061405429;
+            const p = 0.3275911;
+
+            const sign = (x >= 0) ? 1 : -1;
+            x = Math.abs(x);
+
+            // t = 1 / (1 + px)
+            const t = 1.0 / (1.0 + p * x);
+
+            // y = 1 - (a1*t + a2*t^2 + a3*t^3 + a4*t^4 + a5*t^5) * exp(-x^2)
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return sign * y;
+        }
+
+
+        /**
+         * @brief Calculates a unary function (e.g., sin, log, sqrt).
+         * @param {string} op The unary operation key.
+         */
+        function handleUnary(op) {
+            let x = parseFloat(currentInput);
+            let result;
+
+            // Prompt for a second value if required by Legendre or Power
+            if (op === 'legendre') {
+                const orderN = prompt("Enter integer order (n) for Pⁿ(x):", "0");
+                const n = parseInt(orderN, 10);
+                if (isNaN(n) || n < 0) {
+                    showLimitation("Invalid order (n). Must be a non-negative integer.");
+                    return;
+                }
+                if (x > 1 || x < -1) {
+                    showLimitation("Warning: For Legendre polynomials to remain orthogonal, x is usually restricted to [-1, 1].");
+                }
+                result = legendre(n, x);
+            } else if (op === 'cexp') {
+                // Complex Exponential e^(ix) = cos(x) + i*sin(x)
+                const real = Math.cos(x);
+                const imag = Math.sin(x);
+                result = `${real.toFixed(6)} + ${imag.toFixed(6)}i`;
+                showLimitation(`e^(i*${x}) = ${result}. Result is complex and cannot be used in subsequent numerical calculations.`);
+                currentInput = real.toString(); // Keep real part in calculation stream
+                updateDisplay(result);
+                return;
+            } else {
+                switch (op) {
+                    case 'exp': result = Math.exp(x); break;
+                    case 'ln': 
+                        if (x <= 0) { showLimitation("Error: ln is undefined for non-positive numbers."); clearAll(); return; }
+                        result = Math.log(x); break;
+                    case 'sin': result = Math.sin(x); break;
+                    case 'cos': result = Math.cos(x); break;
+                    case 'tan': result = Math.tan(x); break;
+                    case 'asin': 
+                        if (x < -1 || x > 1) { showLimitation("Error: asin domain is [-1, 1]."); clearAll(); return; }
+                        result = Math.asin(x); break;
+                    case 'acos': 
+                        if (x < -1 || x > 1) { showLimitation("Error: acos domain is [-1, 1]."); clearAll(); return; }
+                        result = Math.acos(x); break;
+                    case 'atan': result = Math.atan(x); break;
+                    case 'sinh': result = Math.sinh(x); break;
+                    case 'cosh': result = Math.cosh(x); break;
+                    case 'tanh': result = Math.tanh(x); break;
+                    case 'reciprocal': 
+                        if (x === 0) { showLimitation("Error: Reciprocal of zero."); clearAll(); return; }
+                        result = 1 / x; break;
+                    case 'sqrt': 
+                        if (x < 0) { showLimitation(`Result: Imaginary Number i*${Math.sqrt(-x).toFixed(6)}. Value saved to display is the negative root.`); }
+                        result = Math.sqrt(x); 
+                        break;
+                    case 'gamma': 
+                        result = tgamma(x);
+                        if (isNaN(result)) { showLimitation("Error: Gamma function singularity at non-positive integers."); clearAll(); return; }
+                        break;
+                    case 'erf': result = erf(x); break;
+                    case 'pi': result = PI; break;
+                    default: return;
+                }
+            }
+            
+            currentInput = result.toString();
+            waitingForSecondOperand = true;
+            updateDisplay(currentInput);
+        }
+
+        // --- Event Listener Setup ---
+        
+        document.querySelectorAll('.calc-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const value = button.getAttribute('data-value');
+                const op = button.getAttribute('data-op');
+
+                if (value) {
+                    // Number/Decimal input
+                    inputNumber(value);
+                } else if (op) {
+                    // Operation or Action
+                    switch (op) {
+                        case 'add':
+                        case 'subtract':
+                        case 'multiply':
+                        case 'divide':
+                        case 'pow':
+                            handleOperator(op);
+                            break;
+                        case 'equals':
+                            calculate();
+                            break;
+                        case 'clear':
+                            clearAll();
+                            break;
+                        case 'limitation-vector':
+                            showLimitation('vector');
+                            break;
+                        case 'limitation-deriv-int':
+                            showLimitation('deriv-int');
+                            break;
+                        case 'limitation-fourier':
+                            showLimitation('fourier');
+                            break;
+                        case 'limitation-bessel':
+                            showLimitation('bessel');
+                            break;
+                        case 'limitation-delta':
+                            showLimitation('delta');
+                            break;
+                        default:
+                            // Unary operations
+                            handleUnary(op);
+                            break;
+                    }
+                }
+            });
+        });
+
+        // Initialize with default state
+        clearAll();
+
+    </script>
+</body>
+</html>
